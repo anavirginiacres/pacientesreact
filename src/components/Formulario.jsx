@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Error from './Error';
 
-function Formulario({pacientes, setPacientes}) {
+function Formulario({pacientes, setPacientes, paciente, setPaciente}) {
     // tiene que ir siempre dentro del componente, arriba de funciones y returns, fuera de ifs y fors
     const [nombre, setNombre] = useState('');
     const [propietario, setPropietario] = useState('');
@@ -10,6 +10,23 @@ function Formulario({pacientes, setPacientes}) {
     const [sintomas, setSintomas] = useState('');
 
     const [error, setError] = useState(false);
+
+    /*useEffect(()=>{
+        console.log(paciente)
+    }, [paciente])
+    */
+
+    
+    useEffect(()=>{
+        if(Object.keys(paciente).length>0){
+            setNombre(paciente.nombre)
+            setPropietario(paciente.propietario)
+            setEmail(paciente.email)
+            setFecha(paciente.fecha)
+            setSintomas(paciente.sintomas)
+        }
+    }, [paciente])
+    
 
     const generarId = () => {
         const random = Math.random().toString(36).substring(2);
@@ -27,18 +44,36 @@ function Formulario({pacientes, setPacientes}) {
              return;
         }
         setError(false)
+
         const objetoPaciente = {
             nombre,
             propietario,
             email,
             fecha,
-            sintomas,
-            id : generarId()
+            sintomas
         }
-        //console.log(objetoPaciente)
-        // para no sobreescrbir hay que tomar una copia de lo que ya hay en el arreglo, hay que editar a traves del set
-        setPacientes([...pacientes, objetoPaciente])
-         //setPacientes(objetoPaciente)
+
+        if(paciente.id){
+            //editando el registro
+            objetoPaciente.id = paciente.id
+            //console.log(objetoPaciente)
+            //console.log(paciente)
+
+            const pacientesActualizados = pacientes.map( pacienteState => pacienteState.id === paciente.id ? objetoPaciente : pacienteState )
+
+            setPacientes(pacientesActualizados)
+            setPaciente({})
+        }else{
+            //nuevo registro
+            objetoPaciente.id = generarId();
+            //console.log(objetoPaciente)
+            // para no sobreescrbir hay que tomar una copia de lo que ya hay en el arreglo, hay que editar a traves del set
+            setPacientes([...pacientes, objetoPaciente]);
+             //setPacientes(objetoPaciente)
+        }
+
+
+
 
 
         //ahora limpiamos el formulario
@@ -98,7 +133,7 @@ function Formulario({pacientes, setPacientes}) {
                     <textarea value={sintomas} onChange={ (e) => setSintomas(e.target.value) } placeholder="Describe los síntomas" id="sintomas" type="text" className="w-full border-2 p-2 mt-2 placeholder-gray-400 rounded-md" />
                 </div>
 
-                <input type="submit" className="hover:bg-indigo-700 cursor-pointer transition-all bg-indigo-600 w-full p-3 text-white uppercase font-bold" value="Agregar Paciente">
+                <input type="submit" className="hover:bg-indigo-700 cursor-pointer transition-all bg-indigo-600 w-full p-3 text-white uppercase font-bold" value={ paciente.id ? 'Editar Paciente' : 'Agregar Paciente' }>
                 </input>
             </form>
         </div>
